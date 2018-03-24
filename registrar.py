@@ -202,35 +202,3 @@ class Student(Person):
 		return self.__dict__ == other.__dict__
 		
 
-
-#test cases below
-	#IntroPython = Course('MPCS',51402,'Intro to Python',1)
-	#PythonFall17 = CourseOffering(IntroPython,1,'Flees',2017,'fall')
-	#PythonSpr17 = CourseOffering(IntroPython,2,'Flees',2016,'spring')
-	#PythonFall16 = CourseOffering(IntroPython,2,'Flees',2016,'fall')
-	#Databases = Course('MPCS',53000,'Databases',1)
-	#DatabasesFall16 = CourseOffering(Databases,1,'Freeman',2016,'fall')
-
-	#UC = Institution('UChicago')
-	#akashgoyal = Instructor('Goyal','Akash',UC,'Jan19','akashgoyal')
-	#akashgoyal.courseTaught.extend((PythonFall17,PythonSpr17,PythonFall16))
-	#for item in akashgoyal.list_courses():
-		#print (item.course.name +' year' + str(item.year) + 'quarter ' + item.quarter)
-
-
-
-	#UC.list_of_course_offerings.extend((DatabasesFall16,PythonFall16,PythonSpr17,PythonFall17))
-	#l1 = map(lambda x: x.course.name, UC.list_course_schedule(2016,'spring'))
-	#print (*l1,sep='\n')
-
-	#johnnysack = Student('Sack','Johnny',UC,'blah','johnnysack')
-	#PythonSpr17.submit_grade(johnnysack,'A+')
-	#DatabasesFall16.submit_grade('johnnysack','B-')
-
-	#for item in johnnysack.courseTaken.keys():
-		#print (johnnysack.courseTaken[item])
-
-	#print (johnnysack.gpa)
-	#print (johnnysack.credits)
-	#print (johnnysack.list_courses)
-
