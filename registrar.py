@@ -1,13 +1,15 @@
+#registrar.py
+import pandas as pd 
 import numpy as np 
 
-#global variable that allows you to lookup an instance 
-#of person/student/teacher class from a username
+#global variable that allows you to lookup a person from a username
 allThePeople = {}
 allTheStudents = {}
 allTheTeachers = {}
 
-#convert season to a number so that you can sort by season
+#global variable that converts a season quarter to a number 
 seasons = {"WINTER":1,"SPRING":2,"SUMMER":3,"FALL":4}
+
 
 class Course():
 	def __init__(self,department,number,name,credits):
@@ -27,7 +29,6 @@ class CourseOffering():
 		self.year = year
 		self.quarter = quarter.upper() #make it case insensitive
 		self.studentsEnrolled = []
-		instructor.courseTaught.append(self)
 
 	def __eq__(self,other):
 		return self.__dict__ == other.__dict__
@@ -35,34 +36,28 @@ class CourseOffering():
 	def register_students(self,*students):
 		for kid in students:
 			#add course to dictionary, using tuple as key since an instance of a class isn't hashable
-			kid.courseTaken[(self.course.department,self.course.number,self.course.name, 
-				self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = None 
+			kid.courseTaken[(self.course.department,self.course.number,self.course.name, self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = None 
 			self.studentsEnrolled.append(kid)
 
 	def get_students(self):
-		for student in self.studentsEnrolled:
-			print (student.username)
+		return self.studentsEnrolled
 
 	def submit_grade(self,studentOrUN, grade): #should affect Student class only
 		try:
-			studentOrUN.courseTaken[(self.course.department,self.course.number,self.course.name, 
-				self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = grade 
+			studentOrUN.courseTaken[(self.course.department,self.course.number,self.course.name, self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = grade 
 		except:
 			theStudent = allTheStudents[studentOrUN]
-			theStudent.courseTaken[(self.course.department,self.course.number,self.course.name, 
-				self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = grade 
+			theStudent.courseTaken[(self.course.department,self.course.number,self.course.name, self.course.credits,self.section_number,self.instructor,self.year,self.quarter)] = grade 
 			#find them in the dictionary list.
 
 	def get_grade(self,studentOrUN):
 		try:
 			#assumes argument is a Student
-			return studentOrUN.courseTaken[(self.course.department,self.course.number,self.course.name, 
-				self.course.credits,self.section_number,self.instructor,self.year,self.quarter)]
+			return studentOrUN.courseTaken[(self.course.department,self.course.number,self.course.name, self.course.credits,self.section_number,self.instructor,self.year,self.quarter)]
 		except:
 			#argument is a username so need to find the instance of Student
 			theStudent = allTheStudents[studentOrUN]
-			return theStudent.courseTaken[(self.course.department,self.course.number,self.course.name, 
-				self.course.credits,self.section_number,self.instructor,self.year,self.quarter)]
+			return theStudent.courseTaken[(self.course.department,self.course.number,self.course.name, self.course.credits,self.section_number,self.instructor,self.year,self.quarter)]
 
 class Institution():
 	def __init__(self,name):
@@ -86,30 +81,20 @@ class Institution():
 		for item in self.instructors:
 			if item == anInstructor:
 				myBool = True
-		if not myBool:
+		if myBool == False:
 			self.instructors.append(anInstructor)
 
 	def list_instructors(self):
 		return self.instructors 
 
 	def list_course_catalog(self):
-		for item in self.list_of_courses:
-			print ('Department: '+item.department+'  Number: '+str(item.number)
-				+'  Name: '+item.name+'  Credits: '+item.credits)
+		return self.list_of_courses
 
 	def list_course_schedule(self,year,quarter,departmentName=None):
 		if departmentName is None:
-			schedule = list(filter(lambda x: x.year == year 
-				and x.quarter == quarter.upper(), self.list_of_course_offerings))
+			return list(filter(lambda x: x.year == year and x.quarter == quarter.upper(), self.list_of_course_offerings))
 		else:
-			schedule = list(filter(lambda x: x.year == year 
-				and x.quarter == quarter.upper() and x.course.department == departmentName,
-				self.list_of_course_offerings))
-
-		for courseO in schedule:
-			print ('Department: '+courseO.course.department+'   Name: '+courseO.course.name+'  Teacher: '+
-				courseO.instructor.first_name+' '+courseO.instructor.last_name+'   Year: '+
-				courseO.year+'   Quarter: '+courseO.quarter+'\n')
+			return list(filter(lambda x: x.year == year and x.quarter == quarter.upper() and x.course.department == departmentName, self.list_of_course_offerings))
 
 	def add_course(self,aCourse):
 		myBool = False
@@ -122,16 +107,6 @@ class Institution():
 	def add_course_offering(self,aCourseOffering):
 		self.list_of_course_offerings.append(aCourseOffering)
 
-	def list_enrolled_students(self):
-		for kid in self.list_students():
-			print ('name: '+kid.first_name+' '+kid.last_name+
-				' his/her GPA is: '+ str(kid.gpa))
-
-	def find_course(self,course_id):
-		for item in self.list_of_courses:
-			if course_id == item.number:
-				return item
-
 class Person():
 	def __init__(self,last_name,first_name,school,date_of_birth,username):
 		self.last_name = last_name
@@ -143,6 +118,9 @@ class Person():
 		self.email = username + '@' + school.name +'.edu'
 		allThePeople[self.username] = self #update the dictionary so you can look up a person from a username
 
+	def __eq__(self,other):
+		return self.__dict__ == other.__dict__
+
 class Instructor(Person):
 	def __init__(self,last_name,first_name,school,date_of_birth,username):
 		Person.__init__(self,last_name,first_name,school,date_of_birth,username)
@@ -150,18 +128,19 @@ class Instructor(Person):
 		self.affiliation = 'Instructor'
 		allTheTeachers[self.username] = self #update dictionary so you can look up teacher from a username
 
-	#take a year/quarter as optional inputs and list the instructor's courses in that year and or quarter 
 	def list_courses(self,year=None,quarter=None):
 		courseList = []
 		if year is None and quarter is None:
 			courseList = self.courseTaught
 		elif quarter is None:
-			courseList = list(filter(lambda x: x.year == year,self.courseTaught))
+			l1 = list(filter(lambda x: x.year == year,self.courseTaught))
+			courseList.extend(l1)
 		elif year is None:
-			courseList = list(filter(lambda x: x.quarter == quarter.upper(),self.courseTaught))
+			l1 = list(filter(lambda x: x.quarter == quarter.upper(),self.courseTaught))
+			courseList.extend(l1)
 		else:
-			courseList = list(filter(lambda x: x.quarter == quarter.upper() and x.year==year,
-				self.courseTaught))
+			l1 = list(filter(lambda x: x.quarter == quarter.upper() and x.year==year,self.courseTaught))
+			courseList.extend(l1)
 		return self.reverseChronologicalOrder(courseList)
 
 	#helper function for list courses
@@ -169,18 +148,6 @@ class Instructor(Person):
 		theArray = np.array([[x.year,seasons[x.quarter.upper()],x] for x in listOfClasses])
 		theArray = theArray[np.lexsort((theArray[:,1],theArray[:,0]))][::-1]
 		return theArray[:,2].tolist()
-
-	#take a courseID,section_number,instructor user_id,year,quarter, and find the appropriate course
-	def addNewCourse(self,course_offering_concatenated,university):
-		components = course_offering_concatenated.split('-')
-		instructorInstance = allTheTeachers[components[2]]
-		newCourse = CourseOffering(university.find_course(components[0]),components[1],
-			instructorInstance,components[3],components[4])
-
-		for course_off in university.list_of_course_offerings:
-			if newCourse == course_off:
-				self.courseTaught.append(course_off)
-				return
 
 	def __eq__(self,other):
 		return self.__dict__ == other.__dict__
@@ -231,36 +198,39 @@ class Student(Person):
 		#5 instructor
 		#6 year
 		#7 quarter 
-	
-#scrap work
-if 3 == 4:
-	IntroPython = Course('MPCS',51402,'Intro to Python',1)
-	PythonFall17 = CourseOffering(IntroPython,1,'Flees',2017,'fall')
-	PythonSpr17 = CourseOffering(IntroPython,2,'Flees',2016,'spring')
-	PythonFall16 = CourseOffering(IntroPython,2,'Flees',2016,'fall')
-	Databases = Course('MPCS',53000,'Databases',1)
-	DatabasesFall16 = CourseOffering(Databases,1,'Freeman',2016,'fall')
-
-	UC = Institution('UChicago')
-	akashgoyal = Instructor('Goyal','Akash',UC,'Jan19','akashgoyal')
-	akashgoyal.courseTaught.extend((PythonFall17,PythonSpr17,PythonFall16))
-	for item in akashgoyal.list_courses():
-		print (item.course.name +' year' + str(item.year) + 'quarter ' + item.quarter)
+	def __eq__(self,other):
+		return self.__dict__ == other.__dict__
+		
 
 
+#test cases below
+	#IntroPython = Course('MPCS',51402,'Intro to Python',1)
+	#PythonFall17 = CourseOffering(IntroPython,1,'Flees',2017,'fall')
+	#PythonSpr17 = CourseOffering(IntroPython,2,'Flees',2016,'spring')
+	#PythonFall16 = CourseOffering(IntroPython,2,'Flees',2016,'fall')
+	#Databases = Course('MPCS',53000,'Databases',1)
+	#DatabasesFall16 = CourseOffering(Databases,1,'Freeman',2016,'fall')
 
-	UC.list_of_course_offerings.extend((DatabasesFall16,PythonFall16,PythonSpr17,PythonFall17))
-	l1 = map(lambda x: x.course.name, UC.list_course_schedule(2016,'spring'))
-	print (*l1,sep='\n')
+	#UC = Institution('UChicago')
+	#akashgoyal = Instructor('Goyal','Akash',UC,'Jan19','akashgoyal')
+	#akashgoyal.courseTaught.extend((PythonFall17,PythonSpr17,PythonFall16))
+	#for item in akashgoyal.list_courses():
+		#print (item.course.name +' year' + str(item.year) + 'quarter ' + item.quarter)
 
-	johnnysack = Student('Sack','Johnny',UC,'blah','johnnysack')
-	PythonSpr17.submit_grade(johnnysack,'A+')
-	DatabasesFall16.submit_grade('johnnysack','B-')
 
-	for item in johnnysack.courseTaken.keys():
-		print (johnnysack.courseTaken[item])
 
-	print (johnnysack.gpa)
-	print (johnnysack.credits)
-	print (johnnysack.list_courses)
+	#UC.list_of_course_offerings.extend((DatabasesFall16,PythonFall16,PythonSpr17,PythonFall17))
+	#l1 = map(lambda x: x.course.name, UC.list_course_schedule(2016,'spring'))
+	#print (*l1,sep='\n')
+
+	#johnnysack = Student('Sack','Johnny',UC,'blah','johnnysack')
+	#PythonSpr17.submit_grade(johnnysack,'A+')
+	#DatabasesFall16.submit_grade('johnnysack','B-')
+
+	#for item in johnnysack.courseTaken.keys():
+		#print (johnnysack.courseTaken[item])
+
+	#print (johnnysack.gpa)
+	#print (johnnysack.credits)
+	#print (johnnysack.list_courses)
 
